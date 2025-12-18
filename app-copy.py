@@ -135,7 +135,7 @@ div.stButton > button:hover {
 
 # --- SESSION STATE INITIALIZATION ---
 if "selected_location" not in st.session_state:
-    st.session_state.selected_location = {"lat": 24.555, "lon": -81.782} # Key West Default
+    st.session_state.selected_location = {"lat": -16.5427, "lon": -151.7408} # Default Great Barrier Reef
 if "show_results" not in st.session_state:
     st.session_state.show_results = False
 if "api_result" not in st.session_state:
@@ -164,13 +164,19 @@ if "has_manual_data" not in st.session_state:
 if "mode_chosen_flag" not in st.session_state:
     st.session_state.mode_chosen_flag = False
 
+#--- Logo ---
+col1, col2, col3 = st.columns(3)
+
+with col2:
+    st.image("reefsight_logo_2.png")
 # --- HEADER ---
-st.markdown("<h1 style='text-align: center;'>🌊 ReefSight</h1>", unsafe_allow_html=True)
 st.markdown(
     "<h4 style='text-align:center; color:#004d40;'> Automatic Coral Health Insights Powered by AI</h1>",
     unsafe_allow_html=True
 )
-st.markdown("---")
+
+st.markdown("<div style='padding-top:10px'></div>", unsafe_allow_html=True)
+
 st.markdown("<h5 style='text-align:center;'>Use our model to analyze coral health using images, environmental data, or both.", unsafe_allow_html=True)
 
 # Centered image
@@ -185,6 +191,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.markdown("<div style='padding-top:10px'></div>", unsafe_allow_html=True)
+
 # Centered descriptive sentence
 st.markdown(
     "<p style='text-align:center; font-size:18px;'>Above you can see a clear difference between a Healthy and Bleached South Florida Coral Reef. </p>",
@@ -196,7 +204,7 @@ st.markdown("---")
 st.markdown("<h2 style='text-align:center;'> Select Your Data Type </h2>", unsafe_allow_html=True)
 
 # Use columns to center the radio button group
-col_l, col_c, col_r = st.columns([0.435, 0.455, 0.1])
+col_l, col_c, col_r = st.columns([0.430, 0.450, 0.1])
 
 with col_c:
     st.markdown(
@@ -484,25 +492,25 @@ if st.session_state.mode_chosen_flag:
                     c1,c2 = st.columns(2)
                     with c1:
                         # NOTE: The key must be unique and consistent across reruns.
-                        current_override_features["Distance_to_Shore"] = st.number_input("Distance to Shore (m)", value=43199.05, key="dist_shore", format="%.2f")
-                        current_override_features["Turbidity"] = st.number_input("Turbidity (NTU)", value=0.0546, key="turbidity", format="%.2f")
-                        current_override_features["Cyclone_Frequency"] = st.number_input("Cyclone Frequency", value=43.31, key="cyclone_freq", format="%.1f")
-                        current_override_features["Depth_m"] = st.number_input("Depth (m)", value=4.0, key="depth_m", format="%.1f")
+                        current_override_features["Distance_to_Shore"] = st.number_input("Distance to Shore (m)", value=357.92, key="dist_shore", format="%.2f")
+                        current_override_features["Turbidity"] = st.number_input("Turbidity (NTU)", value=0.028, key="turbidity", format="%.2f")
+                        current_override_features["Cyclone_Frequency"] = st.number_input("Cyclone Frequency", value=52.33, key="cyclone_freq", format="%.1f")
+                        current_override_features["Depth_m"] = st.number_input("Depth (m)", value=2.0, key="depth_m", format="%.1f")
                     with c2:
-                        current_override_features["ClimSST"] = st.number_input("ClimSST (K)", value=296.51, help="Climatological Sea Surface Temperature", key="clim_sst", format="%.1f")
-                        current_override_features["Temperature_Kelvin"] = st.number_input("Temperature (K)", value=297.16, key="temp_k", format="%.1f")
-                        current_override_features["Windspeed"] = st.number_input("Windspeed (m/s)", value=6.0, key="windspeed", format="%.1f")
+                        current_override_features["ClimSST"] = st.number_input("ClimSST (K)", value=300.47, help="Climatological Sea Surface Temperature", key="clim_sst", format="%.1f")
+                        current_override_features["Temperature_Kelvin"] = st.number_input("Temperature (K)", value=301.97, key="temp_k", format="%.1f")
+                        current_override_features["Windspeed"] = st.number_input("Windspeed (m/s)", value=5.0, key="windspeed", format="%.1f")
                         # Categorical feature
-                        current_override_features["Exposure"] = st.selectbox("Reef Exposure", options=["Sheltered", "Exposed", "Sometimes"], index=1, key="exposure")
+                        current_override_features["Exposure"] = st.selectbox("Reef Exposure", options=["Sheltered", "Exposed", "Sometimes"], index=0, key="exposure")
 
                     st.markdown("##### Pulled Environmental Features (Enter data if not pulled)")
                     c3,c4 = st.columns(2)
                     with c3:
-                        current_override_features["SSTA"] = st.number_input("SSTA", value=0.77, help="Sea Surface Temperature Anomaly", key="ssta", format="%.3f")
-                        current_override_features["SSTA_DHW"] = st.number_input("SSTA DHW", value=0.0, help="SSTA Degree Heating Weeks", key="ssta_dhw", format="%.3f")
+                        current_override_features["SSTA"] = st.number_input("SSTA", value=0.52, help="Sea Surface Temperature Anomaly", key="ssta", format="%.3f")
+                        current_override_features["SSTA_DHW"] = st.number_input("SSTA DHW", value=2.58, help="SSTA Degree Heating Weeks", key="ssta_dhw", format="%.3f")
                     with c4:
-                        current_override_features["TSA"] = st.number_input("TSA", value=4.77, help="Thermal Stress Anomaly", key="tsa", format="%.3f")
-                        current_override_features["TSA_DHW"] = st.number_input("TSA DHW", value=0.0, help="Thermal Stress Anomaly Degree Heating Weeks", key="tsa_dhw", format="%.3f")
+                        current_override_features["TSA"] = st.number_input("TSA", value=-0.11, help="Thermal Stress Anomaly", key="tsa", format="%.3f")
+                        current_override_features["TSA_DHW"] = st.number_input("TSA DHW", value=1.36, help="Thermal Stress Anomaly Degree Heating Weeks", key="tsa_dhw", format="%.3f")
 
                 st.markdown("---")
 
