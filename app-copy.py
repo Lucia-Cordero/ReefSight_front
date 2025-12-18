@@ -22,7 +22,6 @@ def img_to_bytes(img: Image.Image) -> str:
 # --- CONFIGURATION ---
 #API_URL = "https://reefsight-api-2-98532754363.europe-west1.run.app/"
 API_URL="https://reefsight-api-2-98532754363.europe-west1.run.app"
-NOAA_DATA_SOURCE_URL = "https://coralreefwatch.noaa.gov/product/5km/index.php#data_access"
 img_url = "https://image2url.com/images/1765895634547-53b1795e-520b-477f-9fd4-7aa744291e4c.jpg"
 
 # Define User options list early for validation
@@ -108,28 +107,31 @@ st.markdown("""
 <style>
 .stApp { background-color: #ffffff; color:#004d40; }
 h1,h2,h3,h4,h5,h6{color:#004d40 !important;}
-button[data-testid*="stFormSubmitButton"] { background-color: darkorange !important; color: white !important; font-weight:bold !important; font-size:16px !important; padding:10px 22px !important; border-radius:8px !important; border:none !important; margin-left:auto !important; margin-right:auto !important; display:block !important; }
+
+div.stButton > button {
+    background-color: darkorange !important;
+    color: white !important;
+    font-weight:bold !important;
+    font-size:16px !important;
+    padding:10px 22px !important;
+    border-radius:8px !important;
+    border:none !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+    display:block !important;
+}
+
+div.stButton > button:hover {
+    background-color:#ff9800 !important;
+}
+
 .fish-loader-container { width:100%; height:50px; overflow:hidden; position:relative; margin:20px 0; background:transparent; }
 .fish-loader { width:50px; height:30px; background-color:#ff8f00; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; position:absolute; left:-100px; animation:swim 3s linear infinite; transform:rotate(-5deg);}
 .fish-loader::after { content:''; position:absolute; top:5px; left:45px; width:20px; height:15px; background-color:#ff8f00; border-radius:50% / 0 100% 0 100%; transform:rotate(45deg);}
 @keyframes swim {0%{left:-10%;}100%{left:110%;}}
-
-div[data-testid="stHorizontalRadio"] div[role="radiogroup"] {
-    display: flex !important;
-    justify-content: center !important;
-    width: 100%;
-    gap: 20px;
-}
-
-div[data-testid="stRadio"] > label {
-    font-size: 1.1em;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid #004d40;
-    transition: all 0.2s;
-}
 </style>
 """, unsafe_allow_html=True)
+
 
 # --- SESSION STATE INITIALIZATION ---
 if "selected_location" not in st.session_state:
@@ -157,7 +159,7 @@ if "prediction_type" not in st.session_state or st.session_state.prediction_type
     st.session_state.prediction_type = "Image+Data"
 
 if "has_manual_data" not in st.session_state:
-    st.session_state.has_manual_data = "No (Pull NOAA Data)"
+    st.session_state.has_manual_data = "No (Pull Data)"
 
 if "mode_chosen_flag" not in st.session_state:
     st.session_state.mode_chosen_flag = False
@@ -420,17 +422,17 @@ if st.session_state.mode_chosen_flag:
             st.markdown(f"### Data Source Selection")
             st.session_state.has_manual_data = st.radio(
                 "Do you have your own environmental data?",
-                ("No (Pull NOAA Data)", "Yes (Manual Data Entry)"),
-                index=0 if st.session_state.has_manual_data == "No (Pull NOAA Data)" else 1,
+                ("No (Pull Data)", "Yes (Manual Data Entry)"),
+                index=0 if st.session_state.has_manual_data == "No (Pull Data)" else 1,
                 key="manual_data_radio"
             )
-            st.info("⚠️ Note: Fetching and processing external NOAA data may take up to 10 minutes!")
+            st.info("⚠️ Note: Fetching and processing external data may take up to 10 minutes!")
             is_manual_tabular_only = st.session_state.has_manual_data == "Yes (Manual Data Entry)"
             show_manual_override = is_manual_tabular_only or is_fusion
             st.markdown("---")
 
     if show_map:
-        map_col, input_col = st.columns([3, 2])
+        map_col, input_col = st.columns(2)
     else:
         map_col = None
         input_col = st.container()
@@ -465,7 +467,7 @@ if st.session_state.mode_chosen_flag:
 
             # --- MANUAL OVERRIDE / FULL MANUAL ENTRY ---
             if show_manual_override:
-                header_text = "Manual Feature Overrides (Will override NOAA data)"
+                header_text = "Manual Feature Overrides (Will override pulled data)"
                 if is_manual_tabular_only:
                     header_text = "Complete Manual Data Entry (Required for prediction)"
 
@@ -482,25 +484,25 @@ if st.session_state.mode_chosen_flag:
                     c1,c2 = st.columns(2)
                     with c1:
                         # NOTE: The key must be unique and consistent across reruns.
-                        current_override_features["Distance_to_Shore"] = st.number_input("Distance to Shore (km)", value=50.0, key="dist_shore", format="%.2f")
-                        current_override_features["Turbidity"] = st.number_input("Turbidity (NTU)", value=0.5, key="turbidity", format="%.2f")
-                        current_override_features["Cyclone_Frequency"] = st.number_input("Cyclone Frequency", value=10.0, key="cyclone_freq", format="%.1f")
-                        current_override_features["Depth_m"] = st.number_input("Depth (m)", value=25.0, key="depth_m", format="%.1f")
+                        current_override_features["Distance_to_Shore"] = st.number_input("Distance to Shore (m)", value=43199.05, key="dist_shore", format="%.2f")
+                        current_override_features["Turbidity"] = st.number_input("Turbidity (NTU)", value=0.0546, key="turbidity", format="%.2f")
+                        current_override_features["Cyclone_Frequency"] = st.number_input("Cyclone Frequency", value=43.31, key="cyclone_freq", format="%.1f")
+                        current_override_features["Depth_m"] = st.number_input("Depth (m)", value=4.0, key="depth_m", format="%.1f")
                     with c2:
-                        current_override_features["ClimSST"] = st.number_input("ClimSST (°C)", value=295.0, help="Climatological Sea Surface Temperature", key="clim_sst", format="%.1f")
-                        current_override_features["Temperature_Kelvin"] = st.number_input("Temperature (K)", value=302.0, key="temp_k", format="%.1f")
-                        current_override_features["Windspeed"] = st.number_input("Windspeed (m/s)", value=5.0, key="windspeed", format="%.1f")
+                        current_override_features["ClimSST"] = st.number_input("ClimSST (K)", value=296.51, help="Climatological Sea Surface Temperature", key="clim_sst", format="%.1f")
+                        current_override_features["Temperature_Kelvin"] = st.number_input("Temperature (K)", value=297.16, key="temp_k", format="%.1f")
+                        current_override_features["Windspeed"] = st.number_input("Windspeed (m/s)", value=6.0, key="windspeed", format="%.1f")
                         # Categorical feature
-                        current_override_features["Exposure"] = st.selectbox("Reef Exposure", options=["Sheltered", "Exposed"], index=1, key="exposure")
+                        current_override_features["Exposure"] = st.selectbox("Reef Exposure", options=["Sheltered", "Exposed", "Sometimes"], index=1, key="exposure")
 
-                    st.markdown("##### NOAA Derived Features (Enter data if not pulling from NOAA)")
+                    st.markdown("##### Pulled Environmental Features (Enter data if not pulled)")
                     c3,c4 = st.columns(2)
                     with c3:
-                        current_override_features["SSTA"] = st.number_input("SSTA", value=0.1, help="Sea Surface Temperature Anomaly", key="ssta", format="%.3f")
-                        current_override_features["SSTA_DHW"] = st.number_input("SSTA DHW", value=0.1, help="SSTA Degree Heating Weeks", key="ssta_dhw", format="%.3f")
+                        current_override_features["SSTA"] = st.number_input("SSTA", value=0.77, help="Sea Surface Temperature Anomaly", key="ssta", format="%.3f")
+                        current_override_features["SSTA_DHW"] = st.number_input("SSTA DHW", value=0.0, help="SSTA Degree Heating Weeks", key="ssta_dhw", format="%.3f")
                     with c4:
-                        current_override_features["TSA"] = st.number_input("TSA", value=0.5, help="Thermal Stress Anomaly", key="tsa", format="%.3f")
-                        current_override_features["TSA_DHW"] = st.number_input("TSA DHW", value=0.5, help="Thermal Stress Anomaly Degree Heating Weeks", key="tsa_dhw", format="%.3f")
+                        current_override_features["TSA"] = st.number_input("TSA", value=4.77, help="Thermal Stress Anomaly", key="tsa", format="%.3f")
+                        current_override_features["TSA_DHW"] = st.number_input("TSA DHW", value=0.0, help="Thermal Stress Anomaly Degree Heating Weeks", key="tsa_dhw", format="%.3f")
 
                 st.markdown("---")
 
@@ -602,7 +604,7 @@ if st.session_state.mode_chosen_flag:
                     "ClimSST": 295.0, "Temperature_Kelvin": 302.0, "Windspeed": 5.0, "Exposure": "Exposed",
                     "SSTA": 0.1, "SSTA_DHW": 0.1, "TSA": 0.5, "TSA_DHW": 0.5
                 },
-                "data_source": "NOAA (Mocked)"
+                "data_source": "NOAA (Default)"
             }
 
         # Display Prediction Result Card
@@ -633,7 +635,7 @@ if st.session_state.mode_chosen_flag:
             """, unsafe_allow_html=True)
 
             # Display Image and Metrics in a row
-            img_col, metric_col = st.columns([1, 2])
+            img_col, metric_col = st.columns([1, 1])
 
             with img_col:
                 st.subheader("Image Analyzed")
@@ -683,8 +685,8 @@ if st.session_state.mode_chosen_flag:
             source_note = ""
             if "data_source" in api_result:
                 source = api_result["data_source"]
-                if source == "NOAA":
-                    source_note = f"Data was fetched from NOAA's Coral Reef Watch data based on location and date."
+                if source == "Data":
+                    source_note = f"Data was fetched from Coral Reef Watch data based on location and date."
                 elif source == "Manual":
                     source_note = "All environmental data was provided manually by the user."
                 elif source == "Image_Only":
@@ -718,7 +720,19 @@ with colM:
         <strong>NO DATA RETENTION POLICY</strong>
     </div>
 """, unsafe_allow_html=True)
-    st.markdown("<h5 style='text-align: center;'>* All inputs (images, coordinates, environmental data) are used only for the immediate prediction request.</h5>", unsafe_allow_html=True)
-    st.markdown("<h5 style='text-align: center;'>* Predictions are generated by machine learning models using submitted data and may contain inaccuracies.</h5>", unsafe_allow_html=True)
-    st.markdown("<h5 style='text-align: center;'>* No data is stored or logged.</h5>", unsafe_allow_html=True)
-    st.markdown("<h5 style='text-align: center;'>* All processing occurs in-memory and is wiped after generating the prediction.</h5>", unsafe_allow_html=True)
+    st.markdown(
+    "<p style='text-align:center; font-size:18px;'>* All inputs (images, coordinates, environmental data) are used only for the immediate prediction request. </p>",
+    unsafe_allow_html=True
+)
+    st.markdown(
+    "<p style='text-align:center; font-size:18px;'>* Predictions are generated by machine learning models using submitted data and may contain inaccuracies.</p>",
+    unsafe_allow_html=True
+)
+    st.markdown(
+    "<p style='text-align:center; font-size:18px;'>* No data is stored or logged. </p>",
+    unsafe_allow_html=True
+)
+    st.markdown(
+    "<p style='text-align:center; font-size:18px;'>* All processing occurs in-memory and is wiped after generating the prediction. </p>",
+    unsafe_allow_html=True
+)
