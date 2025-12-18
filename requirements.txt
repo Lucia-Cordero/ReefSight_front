@@ -5,7 +5,9 @@
 
 # Sreamlit and extensions
 streamlit
+streamlit_folium
 requests
+
 
 
 # If you want to display datasets, or if your API returns you dataframes,
