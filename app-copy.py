@@ -95,6 +95,8 @@ def update_mode_selection():
     st.session_state.prediction_type = st.session_state.mode_selector_radio_temp
     st.session_state.mode_chosen_flag = True
 
+    st.session_state.prediction = None
+
 # --- PAGE SETUP ---
 st.set_page_config(
     page_title="🌊 ReefSight Bleaching Predictor",
@@ -159,7 +161,7 @@ if "prediction_type" not in st.session_state or st.session_state.prediction_type
     st.session_state.prediction_type = "Image+Data"
 
 if "has_manual_data" not in st.session_state:
-    st.session_state.has_manual_data = "No (Pull Data)"
+    st.session_state.has_manual_data = "No (Fetch Data)"
 
 if "mode_chosen_flag" not in st.session_state:
     st.session_state.mode_chosen_flag = False
@@ -195,7 +197,7 @@ st.markdown("<div style='padding-top:10px'></div>", unsafe_allow_html=True)
 
 # Centered descriptive sentence
 st.markdown(
-    "<p style='text-align:center; font-size:18px;'>Above you can see a clear difference between a Healthy and Bleached South Florida Coral Reef. </p>",
+    "<p style='text-align:center; font-size:18px;'>Above you can see a clear difference between a healthy and bleached coral reef in South Florida, USA. </p>",
     unsafe_allow_html=True
 )
 st.markdown("---")
@@ -430,8 +432,8 @@ if st.session_state.mode_chosen_flag:
             st.markdown(f"### Data Source Selection")
             st.session_state.has_manual_data = st.radio(
                 "Do you have your own environmental data?",
-                ("No (Pull Data)", "Yes (Manual Data Entry)"),
-                index=0 if st.session_state.has_manual_data == "No (Pull Data)" else 1,
+                ("No (Fetch Data)", "Yes (Manual Data Entry)"),
+                index=0 if st.session_state.has_manual_data == "No (Fetch Data)" else 1,
                 key="manual_data_radio"
             )
             st.info("⚠️ Note: Fetching and processing external data may take up to 10 minutes!")
