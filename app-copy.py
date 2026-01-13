@@ -95,7 +95,8 @@ def update_mode_selection():
     st.session_state.prediction_type = st.session_state.mode_selector_radio_temp
     st.session_state.mode_chosen_flag = True
 
-    st.session_state.prediction = None
+    st.session_state.show_results = False
+    st.session_state.api_result = None
 
 # --- PAGE SETUP ---
 st.set_page_config(
