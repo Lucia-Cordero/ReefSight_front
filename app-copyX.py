@@ -366,13 +366,13 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
 
         response = requests.post(full_url, **request_kwargs)
 
-        print("Status code:", response.status_code)
-        print("Response text:", response.text)
+        #print("Status code:", response.status_code)
+        #print("Response text:", response.text)
 
-        try:
-            print("Response JSON:", response.json())
-        except Exception:
-            pass
+        # try:
+        #     print("Response JSON:", response.json())
+        # except Exception:
+        #     pass
 
         # Raise HTTP errors first
         response.raise_for_status()
@@ -690,26 +690,26 @@ if st.session_state.mode_chosen_flag:
     if st.session_state.show_results and st.session_state.api_result:
         api_result = st.session_state.api_result
 
-        # Default API result data structure for display if actual API is not called
-        if not api_result.get("prediction"):
-            api_result = {
-                "prediction": {
-                    "probability_bleached": 0.35,
-                    "probability_healthy": 0.65
-                },
-                "input_data": {
-                    "Latitude_Degrees": st.session_state.input_lat,
-                    "Longitude_Degrees": st.session_state.input_lon,
-                    "Date_Year": st.session_state.input_date.year,
-                    "Date_Month": st.session_state.input_date.month
-                },
-                "tabular_features": {
-                    "Distance_to_Shore": 50.0, "Turbidity": 0.5, "Cyclone_Frequency": 10.0, "Depth_m": 25.0,
-                    "ClimSST": 295.0, "Temperature_Kelvin": 302.0, "Windspeed": 5.0, "Exposure": "Exposed",
-                    "SSTA": 0.1, "SSTA_DHW": 0.1, "TSA": 0.5, "TSA_DHW": 0.5
-                },
-                "data_source": "NOAA (Default)"
-            }
+        # # Default API result data structure for display if actual API is not called
+        # if not api_result.get("prediction"):
+        #     api_result = {
+        #         "prediction": {
+        #             "probability_bleached": 0.35,
+        #             "probability_healthy": 0.65
+        #         },
+        #         "input_data": {
+        #             "Latitude_Degrees": st.session_state.input_lat,
+        #             "Longitude_Degrees": st.session_state.input_lon,
+        #             "Date_Year": st.session_state.input_date.year,
+        #             "Date_Month": st.session_state.input_date.month
+        #         },
+        #         "tabular_features": {
+        #             "Distance_to_Shore": 50.0, "Turbidity": 0.5, "Cyclone_Frequency": 10.0, "Depth_m": 25.0,
+        #             "ClimSST": 295.0, "Temperature_Kelvin": 302.0, "Windspeed": 5.0, "Exposure": "Exposed",
+        #             "SSTA": 0.1, "SSTA_DHW": 0.1, "TSA": 0.5, "TSA_DHW": 0.5
+        #         },
+        #         "data_source": "NOAA (Default)"
+        #     }
 
         # Display Prediction Result Card
         if "prediction" in api_result:
