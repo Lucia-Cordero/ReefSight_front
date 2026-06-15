@@ -67,28 +67,6 @@ def get_random_fact():
     return random.choice(CORAL_FACTS)
 
 
-# # --- OCTOPUS LOADER ---
-# def show_octopus_loader():
-#     st.markdown("""
-# <div style="width:100%; height:60px; overflow:hidden; position:relative; background:transparent;">
-#     <div class="octopus" style="font-size:50px; position:absolute; left:-60px;">🐙</div>
-#     <p style="text-align:center; color:#004d40; font-weight:bold; margin-top:10px;">
-#         Fetching environmental data and running prediction...
-#     </p>
-# </div>
-
-# <style>
-# @keyframes swim {
-#     0% { left: -60px; }
-#     100% { left: 100%; }
-# }
-# .octopus {
-#     animation: swim 7s linear infinite;
-#     transform: scale(1.25);
-#     filter: hue-rotate(260deg) saturate(3) brightness(1);
-# }
-# </style>
-# """, unsafe_allow_html=True)
 
 # --- CALLBACK FUNCTION FOR MODE SELECTION ---
 def update_mode_selection():
@@ -131,6 +109,39 @@ div.stButton > button {
 
 div.stButton > button:hover {
     background-color:#ff9800 !important;
+}
+
+
+div[role="radiogroup"] > label:nth-child(3) {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    position: relative;
+}
+
+div[role="radiogroup"] > label:nth-child(3)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 9998;
+    cursor: not-allowed !important;
+    pointer-events: all !important;
+}
+
+div[role="radiogroup"] > label:nth-child(3):hover::after {
+    content: "🚧 This feature is under development";
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 9999;
+    pointer-events: none !important;
 }
 
 .fish-loader-container { width:100%; height:50px; overflow:hidden; position:relative; margin:20px 0; background:transparent; }
@@ -204,7 +215,7 @@ st.markdown(
 
 st.markdown("<div style='padding-top:10px'></div>", unsafe_allow_html=True)
 
-st.markdown("<h5 style='text-align:center;'>Use our model to analyze coral health using images, environmental data, or both.", unsafe_allow_html=True)
+st.write("<h6 style='text-align:center;'>Use our model to analyze coral health using images, environmental data, or both.", unsafe_allow_html=True)
 
 # Centered image
 img = load_image(img_url)
@@ -222,13 +233,13 @@ st.markdown("<div style='padding-top:10px'></div>", unsafe_allow_html=True)
 
 # Centered descriptive sentence
 st.markdown(
-    "<p style='text-align:center; font-size:18px;'>Above you can see a clear difference between a healthy and bleached coral reef in South Florida, USA. </p>",
+    "<p style='text-align:center; font-size:14px;'>Example of a healthy (left) and bleached (right) coral reef in South Florida, USA. </p>",
     unsafe_allow_html=True
 )
 st.markdown("---")
 
 # --- SECTION 1: PREDICTION MODE SELECTION (Centered) ---
-st.markdown("<h3 style='text-align:center;'> What can you tell us about your coral? </h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align:center;'> What can you share about your coral? </h3>", unsafe_allow_html=True)
 
 # Use columns to center the radio button group
 col_l, col_c, col_r = st.columns([0.430, 0.450, 0.1])
@@ -247,6 +258,7 @@ with col_c:
         label_visibility="collapsed",
         on_change=update_mode_selection
     )
+
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -489,14 +501,19 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
 
 # --- SECTION 2: DYNAMIC LAYOUT START (Conditional on mode selection) ---
 if st.session_state.mode_chosen_flag:
+    # Block the "coming soon" option server-side
+    if st.session_state.prediction_type == "Image+Data":
+        st.session_state.prediction_type = st.session_state.get("previous_prediction_type", "Image")
+        st.rerun()
 
+    st.session_state.previous_prediction_type = st.session_state.prediction_type
     current_mode = st.session_state.prediction_type
     is_tabular_only = current_mode == "Data"
-    is_fusion = current_mode == "Image+Data"
+    is_fusion = False   # disabled — feature under development
     is_image_only = current_mode == "Image"
 
-    show_tabular_source_radio = is_tabular_only or is_fusion
-    show_image_uploader = is_fusion or is_image_only
+    show_tabular_source_radio = is_tabular_only
+    show_image_uploader = is_image_only
 
     #st.markdown("<h2 style='text-align:center;'>Input your data</h2>", unsafe_allow_html=True)
     st.markdown("---")
@@ -507,22 +524,79 @@ if st.session_state.mode_chosen_flag:
     if show_tabular_source_radio:
 
         st.markdown("### 🪸 Data Source Selection")
+
+
         col_source_choice, col_disclaimers = st.columns(2)
         with col_source_choice:
             st.markdown(
-                "To determine the health state of a given coral reef, our model requires the following environmental variables:  \n"
-                "<span style='color:#388e3c; '>Observation Date, Longitude, Latitude</span>, "
-                "<span style='color:#1976d2; '>Distance to Shore, Turbidity, Cyclone Frequency, Depth, SSTA, SSTA DHW, "
-                "ClimSST, Temperature, Windspeed, Reef Exposure, TSA, TSA DHW</span>",
-                unsafe_allow_html=True,
-    )
+                """
+                <p style='font-size:16px; margin-bottom:1rem;'>
+                To determine reef health, our model requires the following environmental variables:
+                </p>
 
-            st.markdown(
-                "<span style='color:#388e3c; font-weight:bold;'>⬤</span> Essential inputs — must be provided by you &nbsp;&nbsp;&nbsp;  \n"
-                "<span style='color:#1976d2; font-weight:bold;'>⬤</span> Optional inputs — the program can fetch these automatically.",
+                <div style='display:flex; align-items:flex-start; gap:10px; margin-bottom:0.85rem;'>
+                    <div style='width:8px; height:8px; border-radius:50%; background:#1D9E75; margin-top:6px; flex-shrink:0;'></div>
+                    <div>
+                        <span style='font-size:15px; font-weight:500;'>Essential inputs</span><br>
+                        <div style='display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; width:fit-content;'>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #9FE1CB; color:#085041; background:#E1F5EE; white-space:nowrap;'>Observation Date</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #9FE1CB; color:#085041; background:#E1F5EE; white-space:nowrap;'>Longitude</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #9FE1CB; color:#085041; background:#E1F5EE; white-space:nowrap;'>Latitude</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style='display:flex; align-items:flex-start; gap:10px;'>
+                    <div style='width:8px; height:8px; border-radius:50%; background:#378ADD; margin-top:6px; flex-shrink:0;'></div>
+                    <div>
+                        <span style='font-size:15px; font-weight:500;'>Optional inputs</span><br>
+                        <div style='display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; width:fit-content;'>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Distance to Shore</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Turbidity</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Cyclone Frequency</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Depth</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>SSTA</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>SSTA DHW</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>ClimSST</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Temperature</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Windspeed</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>Reef Exposure</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>TSA</span>
+                            <span style='font-size:14px; padding:3px 12px; border-radius:999px; border:0.5px solid #B5D4F4; color:#0C447C; background:#E6F1FB; white-space:nowrap;'>TSA DHW</span>
+                        </div>
+                    </div>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
 
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(
+                """
+                <style>
+                div[data-testid="stDateInput"] > div,
+                div[data-testeid="stNumberInput"] > div {
+                    border: 1.5px solid #D3D1C7 !important;
+                    border-radius: 8px !important;
+                    background-color: #F5F5F5 !important;
+                    overflow: hidden !important;
+                }
+                div[data-testid="stDateInput"] > div *,
+                div[data-testid="stNumberInput"] > div * {
+                    border: none !important;
+                    box-shadow: none !important;
+                    background-color: #F5F5F5 !important;
+                    outline: none !important;
+                }
+                div[data-testid="stSelectbox"] > div > div {
+                    border: 1.5px solid #D3D1C7 !important;
+                    border-radius: 8px !important;
+                    background-color: #F5F5F5 !important;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
             st.session_state.has_manual_data = st.radio(
                 "Do you have access to the optional inputs?",
                 ("No (fetch data)", "Yes (manual data entry)"),
@@ -533,15 +607,17 @@ if st.session_state.mode_chosen_flag:
         with col_disclaimers:
             days_delay = 90
             if show_tabular_source_radio and st.session_state.has_manual_data == "No (fetch data)":
-                st.info(
-                    "**Implications of data fetching**\n\n"
-                    "⚠️ **Disclaimer 1**: fetching and processing environmental variables "
-                    "from external databases (NOAA ERDDAP servers) may take up to 5 minutes.\n\n"
-                    f"⚠️ **Disclaimer 2**: data can only be fetched up to {days_delay} days before today's date, which falls on the {dt_date.today() - timedelta(days=days_delay)}. \n\n"
-                    "⚠️ **Disclaimer 3**: a fallback strategy has been put in place in case "
-                    "the environmental variables cannot be fetched based on your exact input "
-                    "data.\n\n"
-
+                cutoff_date = dt_date.today() - timedelta(days=days_delay)
+                st.markdown(
+                    f"""
+                    <div style='border:1px solid #B5D4F4; background:#E6F1FB; border-radius:8px; padding:1rem 1.25rem;'>
+                        <p style='font-size:15px; font-weight:500; color:#0C447C; margin-bottom:0.75rem;'>Implications of data fetching</p>
+                        <p style='font-size:14px; color:#0C447C; margin-bottom:0.5rem;'>⚠️ <strong>Disclaimer 1</strong>: fetching and processing environmental variables from external databases (NOAA ERDDAP servers) may take up to 5 minutes.</p>
+                        <p style='font-size:14px; color:#0C447C; margin-bottom:0.5rem;'>⚠️ <strong>Disclaimer 2</strong>: data can only be fetched up to {days_delay} days before today's date, which falls on the {cutoff_date}.</p>
+                        <p style='font-size:14px; color:#0C447C; margin-bottom:0;'>⚠️ <strong>Disclaimer 3</strong>: a fallback strategy has been put in place in case the environmental variables cannot be fetched based on your exact input data.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
         st.markdown("---")
 
@@ -589,6 +665,39 @@ if st.session_state.mode_chosen_flag:
         else:
             # ── Section header ──────────────────────────────────────────
             st.markdown("### 📍 Date and Location")
+
+            st.markdown(
+                """
+                <style>
+                /* Outer Streamlit wrappers — these get the visible border */
+                div[data-testid="stDateInput"] > div,
+                div[data-testid="stNumberInput"] > div {
+                    border: 1.5px solid #D3D1C7 !important;
+                    border-radius: 8px !important;
+                    background-color: #F5F5F5 !important;
+                    overflow: hidden !important;
+                }
+
+                /* Everything inside — strip all borders */
+                div[data-testid="stDateInput"] > div *,
+                div[data-testid="stNumberInput"] > div * {
+                    border: none !important;
+                    box-shadow: none !important;
+                    background-color: #F5F5F5 !important;
+                    outline: none !important;
+                }
+
+                /* Selectbox */
+                div[data-testid="stSelectbox"] > div > div {
+                    border: 1.5px solid #D3D1C7 !important;
+                    border-radius: 8px !important;
+                    background-color: #F5F5F5 !important;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+
             st.write(
                 "Please indicate a date and location for your coral reef observation. "
                 "You can manually input the reef's geocoordinates or use the map to localise it"
@@ -605,28 +714,29 @@ if st.session_state.mode_chosen_flag:
                 # When there are no manual fields, we use st.form for the UX benefit
                 # of Enter-to-submit.
                 if show_manual_override:
-                    # --- Formless inputs (state written on every rerun) ---
-                    input_date = st.date_input(
-                        "Observation Date",
-                        value=st.session_state.input_date,
-                        key="date_input",
-                    )
-                    input_lat = st.number_input(
-                        "Latitude (Degrees)",
-                        value=st.session_state.input_lat,
-                        format="%.6f",
-                        key="lat_input",
-                    )
-                    input_lon = st.number_input(
-                        "Longitude (Degrees)",
-                        value=st.session_state.input_lon,
-                        format="%.6f",
-                        key="lon_input",
-                    )
+                    with st.container(border=True):
+                        input_date = st.date_input(
+                            "Observation Date",
+                            value=st.session_state.input_date,
+                            key="date_input",
+                        )
+                        input_lat = st.number_input(
+                            "Latitude (Degrees)",
+                            value=st.session_state.input_lat,
+                            format="%.6f",
+                            key="lat_input",
+                        )
+                        input_lon = st.number_input(
+                            "Longitude (Degrees)",
+                            value=st.session_state.input_lon,
+                            format="%.6f",
+                            key="lon_input",
+                        )
                     st.session_state.input_lat = input_lat
                     st.session_state.input_lon = input_lon
                     st.session_state.input_date = input_date
                     st.session_state.selected_location = {"lat": input_lat, "lon": input_lon}
+                    submitted = False
 
                     if show_image_uploader:
                         st.markdown("---")
@@ -731,6 +841,7 @@ if st.session_state.mode_chosen_flag:
                     else "🌡️ Other Environmental Variables"
                 )
                 st.markdown(f"### {header_text}")
+
 
                 # For Fusion mode, wrap in an expander so it stays optional
                 _show_fields = True
@@ -858,9 +969,7 @@ if st.session_state.mode_chosen_flag:
     st.markdown("---")
     st.markdown("<h2 style='text-align:center;'>Results:</h2>", unsafe_allow_html=True)
 
-    # Display Loader while thinking
-    #if st.session_state.is_loading:
-        #show_octopus_loader()
+
 
     if st.session_state.show_results and st.session_state.api_result:
         api_result = st.session_state.api_result
