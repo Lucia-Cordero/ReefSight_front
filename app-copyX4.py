@@ -4,6 +4,7 @@ import pandas as pd
 import json
 from datetime import datetime as dt
 from datetime import date as dt_date
+from datetime import timedelta
 from streamlit_folium import st_folium
 import folium
 from PIL import Image
@@ -57,7 +58,7 @@ CORAL_FACTS = [
     " Reducing pollution and improving water quality can help alleviate some of the stressors that contribute to coral bleaching.",
     " Coral reefs support over 25% of all marine species, despite covering less than 1% of the ocean floor.",
     " They provide food and livelihood for millions of people worldwide.",
-    " Coral reefs are a source of new medicines, including treatments for cancer and other medicines.",
+    " Coral reefs are a source of new medicines, including treatments for cancer and other diseases.",
     " Healthy coral reefs contribute to the overall health of the ocean, which is essential for the planet's climate regulation.",
     " Protecting coral reefs is crucial for maintaining biodiversity and the well-being of human communities that depend on them."
 ]
@@ -66,28 +67,28 @@ def get_random_fact():
     return random.choice(CORAL_FACTS)
 
 
-# --- OCTOPUS LOADER ---
-def show_octopus_loader():
-    st.markdown("""
-<div style="width:100%; height:60px; overflow:hidden; position:relative; background:transparent;">
-    <div class="octopus" style="font-size:50px; position:absolute; left:-60px;">🐙</div>
-    <p style="text-align:center; color:#004d40; font-weight:bold; margin-top:10px;">
-        Fetching environmental data and running prediction...
-    </p>
-</div>
+# # --- OCTOPUS LOADER ---
+# def show_octopus_loader():
+#     st.markdown("""
+# <div style="width:100%; height:60px; overflow:hidden; position:relative; background:transparent;">
+#     <div class="octopus" style="font-size:50px; position:absolute; left:-60px;">🐙</div>
+#     <p style="text-align:center; color:#004d40; font-weight:bold; margin-top:10px;">
+#         Fetching environmental data and running prediction...
+#     </p>
+# </div>
 
-<style>
-@keyframes swim {
-    0% { left: -60px; }
-    100% { left: 100%; }
-}
-.octopus {
-    animation: swim 7s linear infinite;
-    transform: scale(1.25);
-    filter: hue-rotate(260deg) saturate(3) brightness(1);
-}
-</style>
-""", unsafe_allow_html=True)
+# <style>
+# @keyframes swim {
+#     0% { left: -60px; }
+#     100% { left: 100%; }
+# }
+# .octopus {
+#     animation: swim 7s linear infinite;
+#     transform: scale(1.25);
+#     filter: hue-rotate(260deg) saturate(3) brightness(1);
+# }
+# </style>
+# """, unsafe_allow_html=True)
 
 # --- CALLBACK FUNCTION FOR MODE SELECTION ---
 def update_mode_selection():
@@ -505,7 +506,7 @@ if st.session_state.mode_chosen_flag:
     # ---------------------------------------------------------------
     if show_tabular_source_radio:
 
-        st.markdown("### Data Source Selection")
+        st.markdown("### 🪸 Data Source Selection")
         col_source_choice, col_disclaimers = st.columns(2)
         with col_source_choice:
             st.markdown(
@@ -530,14 +531,17 @@ if st.session_state.mode_chosen_flag:
                 horizontal=True,
             )
         with col_disclaimers:
+            days_delay = 90
             if show_tabular_source_radio and st.session_state.has_manual_data == "No (fetch data)":
                 st.info(
                     "**Implications of data fetching**\n\n"
                     "⚠️ **Disclaimer 1**: fetching and processing environmental variables "
                     "from external databases (NOAA ERDDAP servers) may take up to 5 minutes.\n\n"
-                    "⚠️ **Disclaimer 2**: a fallback strategy has been put in place in case "
+                    f"⚠️ **Disclaimer 2**: data can only be fetched up to {days_delay} days before today's date, which falls on the {dt_date.today() - timedelta(days=days_delay)}. \n\n"
+                    "⚠️ **Disclaimer 3**: a fallback strategy has been put in place in case "
                     "the environmental variables cannot be fetched based on your exact input "
-                    "data (refer to the legend on the right-hand side)."
+                    "data.\n\n"
+
                 )
         st.markdown("---")
 
@@ -569,9 +573,10 @@ if st.session_state.mode_chosen_flag:
         # ---------------------------------------------------------------
         if is_image_only:
             with st.form("prediction_input_form", clear_on_submit=False):
-                st.subheader("Image Input")
+                st.subheader("🪸 Image Source Selection")
+                st.write("Upload a coral image from your last vacation to learn if the reef was healthy or not!")
                 current_uploaded_file = st.file_uploader(
-                    "Upload coral image", type=["jpg", "png", "jpeg"], key="image_uploader"
+                    "", type=["jpg", "png", "jpeg"], key="image_uploader"
                 )
                 st.session_state.uploaded_file = current_uploaded_file
                 submitted = st.form_submit_button(
@@ -702,7 +707,7 @@ if st.session_state.mode_chosen_flag:
                             st.session_state.selected_location["lon"],
                         ],
                         tooltip="Selected Location",
-                        icon=folium.Icon(color="darkblue", icon="fish", prefix="fa"),
+                        icon=folium.Icon(color="red", icon="fish", prefix="fa"),
                     ).add_to(m)
 
                 map_data = st_folium(m, width="100%", height=460)
@@ -854,8 +859,8 @@ if st.session_state.mode_chosen_flag:
     st.markdown("<h2 style='text-align:center;'>Results:</h2>", unsafe_allow_html=True)
 
     # Display Loader while thinking
-    if st.session_state.is_loading:
-        show_octopus_loader()
+    #if st.session_state.is_loading:
+        #show_octopus_loader()
 
     if st.session_state.show_results and st.session_state.api_result:
         api_result = st.session_state.api_result
@@ -866,74 +871,68 @@ if st.session_state.mode_chosen_flag:
         if "prediction" in api_result:
             prediction_data = api_result["prediction"]
 
-            # --- Robust Classification Logic using Probability ---
             probability_bleached = prediction_data.get("probability_bleached", 0.0)
             probability_unbleached = prediction_data.get("probability_healthy", 0.0)
-
             risk = probability_bleached * 100
+            prob_healthy = probability_unbleached * 100
 
             if probability_bleached > 0.5:
                 final_classification = "Bleached"
-                color = "#f44336" # Red
                 icon = "🔥"
             else:
                 final_classification = "Healthy"
-                color = "#4CAF50" # Green
-                icon = "✅"
+                icon = "🌿"
 
             level = "High Risk" if risk > 70 else ("Moderate Risk" if risk > 40 else "Low Risk")
-
-            # Classification card
             border_color = "#E24B4A" if final_classification == "Bleached" else "#639922"
-            icon = "🔥" if final_classification == "Bleached" else "🌿"
             badge_bg = "#FCEBEB" if final_classification == "Bleached" else "#EAF3DE"
             badge_text_color = "#A32D2D" if final_classification == "Bleached" else "#3B6D11"
-            prob_healthy = probability_unbleached * 100
+            fact = get_random_fact()
 
-            result_col, fact_col = st.columns([1, 1])
-
-            with result_col:
+            def render_classification_card():
                 st.markdown(f"""
                 <div style="border: 0.5px solid #e0e0e0; border-left: 3px solid {border_color};
                     border-radius: 10px; padding: 1rem 1.25rem; display: flex;
-                    align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-                <div>
-                    <p style="font-size: 12px; color: #888; text-transform: uppercase;
-                    letter-spacing: 0.05em; margin: 0 0 4px;">Classification</p>
-                    <p style="font-size: 20px; font-weight: 500; margin: 0;">
-                    {final_classification}
-                    <span style="font-size: 12px; font-weight: 500; padding: 3px 10px;
-                        border-radius: 99px; background: {badge_bg}; color: {badge_text_color};
-                        margin-left: 8px;">{level}</span>
-                    </p>
-                </div>
-                <span style="font-size: 28px;">{icon}</span>
-                </div>
-
-                <p style="font-size: 12px; color: #aaa; text-transform: uppercase;
-                letter-spacing: 0.06em; margin-bottom: 10px;">Confidence</p>
-
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <span style="font-size: 13px; color: #888; width: 90px;">Healthy</span>
-                <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
-                    <div style="width: {prob_healthy:.1f}%; height: 100%; background: #639922; border-radius: 99px;"></div>
-                </div>
-                <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{prob_healthy:.1f}%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 13px; color: #888; width: 90px;">Bleached</span>
-                <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
-                    <div style="width: {risk:.1f}%; height: 100%; background: #E24B4A; border-radius: 99px;"></div>
-                </div>
-                <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{risk:.1f}%</span>
+                    align-items: center; justify-content: space-between; min-height: 120px;">
+                    <div>
+                        <p style="font-size: 12px; color: #888; text-transform: uppercase;
+                        letter-spacing: 0.05em; margin: 0 0 4px;">Classification</p>
+                        <p style="font-size: 20px; font-weight: 500; margin: 0;">
+                        {final_classification}
+                        <span style="font-size: 12px; font-weight: 500; padding: 3px 10px;
+                            border-radius: 99px; background: {badge_bg}; color: {badge_text_color};
+                            margin-left: 8px;">{level}</span>
+                        </p>
+                    </div>
+                    <span style="font-size: 28px;">{icon}</span>
                 </div>
                 """, unsafe_allow_html=True)
 
-            with fact_col:
-                fact = get_random_fact()
+            def render_confidence_bars():
+                st.markdown(f"""
+                <p style="font-size: 12px; color: #aaa; text-transform: uppercase;
+                letter-spacing: 0.06em; margin-bottom: 10px; margin-top: 16px;">Confidence</p>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 13px; color: #888; width: 90px;">Healthy</span>
+                    <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
+                        <div style="width: {prob_healthy:.1f}%; height: 100%; background: #639922; border-radius: 99px;"></div>
+                    </div>
+                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{prob_healthy:.1f}%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 13px; color: #888; width: 90px;">Bleached</span>
+                    <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
+                        <div style="width: {risk:.1f}%; height: 100%; background: #E24B4A; border-radius: 99px;"></div>
+                    </div>
+                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{risk:.1f}%</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+            def render_fact_card():
                 st.markdown(f"""
                 <div style="border: 0.5px solid #e0e0e0; border-left: 3px solid #888;
-                    border-radius: 10px; padding: 1rem 1.25rem; margin-top: 0.5rem;">
+                    border-radius: 10px; padding: 1rem 1.25rem; min-height: 120px;
+                    display: flex; flex-direction: column; justify-content: center;">
                 <p style="font-size: 12px; color: #888; text-transform: uppercase;
                     letter-spacing: 0.05em; margin: 0 0 8px;">Did you know?</p>
                 <p style="font-size: 14px; color: var(--color-text-primary);
@@ -941,22 +940,26 @@ if st.session_state.mode_chosen_flag:
                 </div>
                 """, unsafe_allow_html=True)
 
-
-            # Display Image and Metrics
+            # --- MODE-SPECIFIC LAYOUT ---
             if is_image_only or is_fusion:
-                img_col, metric_col = st.columns([1, 1])
+                img_col, results_col = st.columns([1, 1])
                 with img_col:
-                    st.markdown("<br><br>", unsafe_allow_html=True)
-                    st.markdown("""
-                                ##### Image Analyzed
-                                """)
+                    st.markdown("##### Image analyzed")
                     if st.session_state.uploaded_file:
-                        st.image(st.session_state.uploaded_file, caption="User Upload")
-            else:
-                metric_col = st.container()
-
-            with metric_col:
-                prob_healthy = probability_unbleached * 100
+                        st.image(st.session_state.uploaded_file, caption="User upload")
+                with results_col:
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    render_classification_card()
+                    render_confidence_bars()
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    render_fact_card()
+            else:  # Data mode
+                result_col, fact_col = st.columns([1, 1])
+                with result_col:
+                    render_classification_card()
+                    render_confidence_bars()
+                with fact_col:
+                    render_fact_card()
 
 
 
