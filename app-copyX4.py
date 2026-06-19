@@ -1021,16 +1021,16 @@ if st.session_state.mode_chosen_flag:
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                     <span style="font-size: 13px; color: #888; width: 90px;">Healthy</span>
                     <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
-                        <div style="width: {prob_healthy:.1f}%; height: 100%; background: #639922; border-radius: 99px;"></div>
+                        <div style="width: {prob_healthy:.0f}%; height: 100%; background: #639922; border-radius: 99px;"></div>
                     </div>
-                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{prob_healthy:.1f}%</span>
+                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{prob_healthy:.0f}%</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 13px; color: #888; width: 90px;">Bleached</span>
                     <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden;">
-                        <div style="width: {risk:.1f}%; height: 100%; background: #E24B4A; border-radius: 99px;"></div>
+                        <div style="width: {risk:.0f}%; height: 100%; background: #E24B4A; border-radius: 99px;"></div>
                     </div>
-                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{risk:.1f}%</span>
+                    <span style="font-size: 13px; font-weight: 500; width: 40px; text-align: right;">{risk:.0f}%</span>
                 </div>
                 """, unsafe_allow_html=True)
 
