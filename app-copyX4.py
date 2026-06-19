@@ -698,10 +698,7 @@ if st.session_state.mode_chosen_flag:
                 unsafe_allow_html=True,
             )
 
-            st.write(
-                "Please indicate a date and location for your coral reef observation. "
-                "You can manually input the reef's geocoordinates or use the map to localise it"
-            )
+            st.markdown("Please indicate a date and location for your coral reef observation.<br>You can manually input the reef's geocoordinates or use the map to localise it", unsafe_allow_html=True)
 
             # ── Two-column layout: inputs left, map right ────────────────
             input_col, map_col = st.columns([1, 1])
@@ -967,7 +964,7 @@ if st.session_state.mode_chosen_flag:
 
     # --- RESULTS DISPLAY ---
     st.markdown("---")
-    st.markdown("<h2 style='text-align:center;'>Results:</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Results</h2>", unsafe_allow_html=True)
 
 
 
@@ -1050,18 +1047,38 @@ if st.session_state.mode_chosen_flag:
                 """, unsafe_allow_html=True)
 
             # --- MODE-SPECIFIC LAYOUT ---
+
             if is_image_only or is_fusion:
-                img_col, results_col = st.columns([1, 1])
+                # --- ROW 1: Images ---
+                img_col, gradcam_col = st.columns([1, 1])
+
                 with img_col:
-                    st.markdown("##### Image analyzed")
+                    st.markdown("###### Image analyzed")
                     if st.session_state.uploaded_file:
-                        st.image(st.session_state.uploaded_file, caption="User upload")
-                with results_col:
-                    st.markdown("<br><br>", unsafe_allow_html=True)
+                        st.image(st.session_state.uploaded_file,
+                                caption="User upload",
+                                use_container_width=True)
+
+                with gradcam_col:
+                    st.markdown("###### Model explanation (GradCAM)")
+                    if "gradcam_image" in api_result:
+                        gradcam_bytes = base64.b64decode(api_result["gradcam_image"])
+                        st.image(gradcam_bytes, width=579)
+                        st.caption('🔴 Red = most influential / 🔵 Blue = least influential (for "healthy" prediction)')
+
+
+
+                # --- ROW 2: Results cards ---
+                st.markdown("<br>", unsafe_allow_html=True)
+                class_col, conf_col, fact_col = st.columns([1, 1, 1])
+
+                with class_col:
                     render_classification_card()
+                with conf_col:
                     render_confidence_bars()
-                    st.markdown("<br>", unsafe_allow_html=True)
+                with fact_col:
                     render_fact_card()
+
             else:  # Data mode
                 result_col, fact_col = st.columns([1, 1])
                 with result_col:
