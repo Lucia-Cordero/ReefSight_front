@@ -426,6 +426,43 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
             # FETCH ERRORS
             # ---------------------------------------------------
 
+            # fetch_errors = detail.get("fetch_errors", {})
+
+            # if fetch_errors:
+
+
+            #     with st.expander(
+            #         "Show unavailable environmental variables"
+            #     ):
+
+            #         for variable, msg in fetch_errors.items():
+
+            #             st.markdown(
+            #                 f"""
+            #                 <div style="
+            #                     background-color:#ffebee;
+            #                     padding:10px;
+            #                     border-radius:8px;
+            #                     margin-bottom:8px;
+            #                     border-left:6px solid #E24B4A;
+            #                 ">
+            #                     <b>{variable}</b><br>
+            #                     {msg}
+            #                 </div>
+            #                 """,
+            #                 unsafe_allow_html=True
+            #             )
+
+            VARIABLE_LABELS = {
+                "env": "Environmental variables (Clim_SST/SST/SSTA/SSTA_DHW/TSA/TSA_DHW)",
+                "turb": "Turbidity",
+                "dist": "Distance to shore (m)",
+                "depth": "Depth (m)",
+                "exp": "Exposure",
+                "cyc": "Cyclone Frequency",
+                "wind": "Windspeed",
+            }
+
             fetch_errors = detail.get("fetch_errors", {})
 
             if fetch_errors:
@@ -435,7 +472,7 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
                     "Show unavailable environmental variables"
                 ):
 
-                    for variable, msg in fetch_errors.items():
+                    for variable in fetch_errors:
 
                         st.markdown(
                             f"""
@@ -446,13 +483,13 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
                                 margin-bottom:8px;
                                 border-left:6px solid #E24B4A;
                             ">
-                                <b>{variable}</b><br>
-                                {msg}
+                                <b>{VARIABLE_LABELS.get(variable, variable)}</b>
                             </div>
                             """,
                             unsafe_allow_html=True
                         )
-
+                        # first variable is the key to look up
+                        # second variable is the default if the key doesn't exist
 
 
             # ---------------------------------------------------
