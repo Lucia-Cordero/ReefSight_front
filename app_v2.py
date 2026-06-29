@@ -22,8 +22,8 @@ def img_to_bytes(img: Image.Image) -> str:
     return base64.b64encode(buffered.getvalue()).decode()
 
 # --- CONFIGURATION ---
-#API_URL = "https://reefsight-api-2-98532754363.europe-west1.run.app/"
-API_URL="http://127.0.0.1:8000"
+API_URL = "https://reefsight-api-v2-98532754363.europe-west1.run.app"
+#API_URL="http://127.0.0.1:8000"
 img_url = "https://image2url.com/images/1765895634547-53b1795e-520b-477f-9fd4-7aa744291e4c.jpg"
 
 # Define User options list early for validation
