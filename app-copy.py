@@ -380,7 +380,8 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
             request_kwargs["files"] = api_call_kwargs.get("files")
             request_kwargs["data"] = api_call_kwargs.get("data")
 
-        response = requests.post(full_url, **request_kwargs)
+        with st.spinner("⏳ Fetching environmental data from NOAA & running prediction... This may take a few minutes, please don't close the page!"):
+            response = requests.post(full_url, **request_kwargs)
 
 
         # Raise HTTP errors first
