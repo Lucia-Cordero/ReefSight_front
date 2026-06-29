@@ -4,3 +4,9 @@ backgroundColor="#f5f7fa"
 secondaryBackgroundColor="#9dc8e4"
 textColor="#22223b"
 font="sans serif"
+
+[server]
+maxUploadSize = 200
+
+[browser]
+gatherUsageStats = false
