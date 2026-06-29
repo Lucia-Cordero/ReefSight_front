@@ -371,7 +371,7 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
         full_url = f"{API_URL}{endpoint}"
 
         request_kwargs = {
-            "timeout": 600,
+            "timeout": 3600,
         }
 
         if "json" in api_call_kwargs:
