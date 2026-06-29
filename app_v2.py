@@ -422,39 +422,14 @@ def run_prediction(input_lat, input_lon, input_date, prediction_type, override_f
             if suggestion:
                 st.info(f"ℹ️ Suggestion: {suggestion}")
 
-            # ---------------------------------------------------
+            #---------------------------------------------------
             # FETCH ERRORS
-            # ---------------------------------------------------
-
-            # fetch_errors = detail.get("fetch_errors", {})
-
-            # if fetch_errors:
+            #---------------------------------------------------
 
 
-            #     with st.expander(
-            #         "Show unavailable environmental variables"
-            #     ):
-
-            #         for variable, msg in fetch_errors.items():
-
-            #             st.markdown(
-            #                 f"""
-            #                 <div style="
-            #                     background-color:#ffebee;
-            #                     padding:10px;
-            #                     border-radius:8px;
-            #                     margin-bottom:8px;
-            #                     border-left:6px solid #E24B4A;
-            #                 ">
-            #                     <b>{variable}</b><br>
-            #                     {msg}
-            #                 </div>
-            #                 """,
-            #                 unsafe_allow_html=True
-            #             )
 
             VARIABLE_LABELS = {
-                "env": "Environmental variables (Clim_SST/SST/SSTA/SSTA_DHW/TSA/TSA_DHW)",
+                "env": "Sea surface temperature variables (Clim_SST/SST/SSTA/SSTA_DHW/TSA/TSA_DHW)",
                 "turb": "Turbidity",
                 "dist": "Distance to shore (m)",
                 "depth": "Depth (m)",
@@ -1093,7 +1068,6 @@ if st.session_state.mode_chosen_flag:
                     st.markdown("###### Image analyzed")
                     if st.session_state.uploaded_file:
                         st.image(st.session_state.uploaded_file,
-                                caption="User upload",
                                 use_container_width=True)
 
                 with gradcam_col:
@@ -1101,7 +1075,23 @@ if st.session_state.mode_chosen_flag:
                     if "gradcam_image" in api_result:
                         gradcam_bytes = base64.b64decode(api_result["gradcam_image"])
                         st.image(gradcam_bytes, width=579)
-                        st.caption('🔴 Red = most influential / 🔵 Blue = least influential (for "healthy" prediction)')
+
+                        st.markdown(
+                                """
+                                <div style='display: flex; justify-content: space-between; width: 579px;
+                                            color: grey; font-size: 0.8rem;'>
+                                    <span>Bleached</span>
+                                    <span>Healthy</span>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
+
+
+
+
+
 
 
 
